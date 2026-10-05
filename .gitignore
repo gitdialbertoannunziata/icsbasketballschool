@@ -1,0 +1,10 @@
+node_modules/
+dist/
+api/dist/
+.azurite/
+import-output/
+api/local.settings.json
+.env
+.env.local
+*.log
+.swa/

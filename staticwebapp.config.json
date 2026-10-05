@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "platform": {
+    "apiRuntime": "node:20"
+  },
+  "trailingSlash": "never",
+  "routes": [
+    { "route": "/admin*", "allowedRoles": ["admin"] },
+    { "route": "/api/manage/*", "allowedRoles": ["admin"] },
+    { "route": "/.auth/login/github", "statusCode": 404 },
+    { "route": "/.auth/login/twitter", "statusCode": 404 },
+
+    { "route": "/camp-gressoney", "redirect": "/eventi/summer-camp-gressoney", "statusCode": 301 },
+    { "route": "/progetto-13-19-beyond", "redirect": "/eventi/progetto-13-19-beyond", "statusCode": 301 },
+    { "route": "/iscrizioni", "redirect": "/eventi/summer-camp-gressoney/iscrizione", "statusCode": 301 },
+    { "route": "/iscrizioni-progetto-13-19-beyond", "redirect": "/eventi/progetto-13-19-beyond/iscrizione", "statusCode": 301 },
+
+    { "route": "/assets/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } }
+  ],
+  "responseOverrides": {
+    "401": {
+      "statusCode": 302,
+      "redirect": "/.auth/login/aad?post_login_redirect_uri=.referrer"
+    }
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/api/*", "/.auth/*", "*.{png,jpg,jpeg,webp,svg,ico,pdf,txt,xml,json,css,js}"]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' data: blob: https://*.blob.core.windows.net https://*.azureedge.net https://*.azurefd.net https://icsbasketballschool.it https://i.ytimg.com http://127.0.0.1:10000 http://localhost:10000; media-src 'self' blob: https://*.blob.core.windows.net https://*.azureedge.net https://*.azurefd.net https://icsbasketballschool.it http://127.0.0.1:10000 http://localhost:10000; connect-src 'self' https://*.blob.core.windows.net http://127.0.0.1:10000 http://localhost:10000; frame-src https://www.youtube-nocookie.com https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  },
+  "mimeTypes": {
+    ".webp": "image/webp"
+  }
+}

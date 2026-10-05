@@ -1,0 +1,35 @@
+{
+  "name": "ICS Basketball School",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
+  },
+  "forwardPorts": [4280, 5173, 7071, 10000],
+  "portsAttributes": {
+    "4280": { "label": "Sito (SWA CLI)", "onAutoForward": "silent" },
+    "5173": { "label": "Vite", "onAutoForward": "silent" },
+    "7071": { "label": "API Functions", "onAutoForward": "silent" },
+    "10000": { "label": "Azurite Blob", "onAutoForward": "silent" }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-api-node_modules,target=${containerWorkspaceFolder}/api/node_modules,type=volume"
+  ],
+  "postCreateCommand": "sudo chown node:node node_modules api/node_modules && npm ci && npm --prefix api ci && ([ -f api/local.settings.json ] || cp api/local.settings.sample.json api/local.settings.json)",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-azurestaticwebapps",
+        "ms-azuretools.vscode-azurefunctions",
+        "Azurite.azurite",
+        "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true"
+  }
+}

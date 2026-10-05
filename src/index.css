@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #c05c03;
+  --color-brand-dark: #9a4902;
+  --color-brand-light: #e07a1f;
+  --color-ink: #0b0b0c;
+  --color-coal: #18181b;
+  --color-graphite: #303133;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Oswald", "Inter", ui-sans-serif, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink text-zinc-100 antialiased;
+}
+
+/* Testo ricco (HTML dall'editor) */
+.rich {
+  @apply leading-relaxed;
+}
+.rich p { @apply my-3; }
+.rich h2 { @apply font-display text-2xl uppercase tracking-wide mt-6 mb-3; }
+.rich h3 { @apply font-display text-xl uppercase tracking-wide mt-5 mb-2; }
+.rich h4 { @apply font-semibold text-lg mt-4 mb-2; }
+.rich ul { @apply list-disc pl-6 my-3 space-y-1; }
+.rich ol { @apply list-decimal pl-6 my-3 space-y-1; }
+.rich a { @apply text-brand-light underline underline-offset-2 hover:text-brand; }
+.rich strong { @apply font-semibold; }
+.rich blockquote { @apply border-l-4 border-brand pl-4 italic opacity-90; }
+.rich-light a { @apply text-brand-dark; }
+
+/* Editor TipTap nell'admin */
+.tiptap {
+  @apply min-h-40 px-3 py-2 outline-none text-zinc-900;
+}
+.tiptap p { @apply my-2; }
+.tiptap h2 { @apply text-xl font-bold mt-4 mb-2; }
+.tiptap h3 { @apply text-lg font-bold mt-3 mb-2; }
+.tiptap ul { @apply list-disc pl-6; }
+.tiptap ol { @apply list-decimal pl-6; }
+.tiptap a { @apply text-brand-dark underline; }
+.tiptap blockquote { @apply border-l-4 border-zinc-300 pl-3 italic; }
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-zinc-400 float-left h-0 pointer-events-none;
+}
+
+.admin-scope {
+  @apply bg-zinc-100 text-zinc-900;
+}
