@@ -11,6 +11,18 @@ export interface SocialLinks {
   youtube?: string;
 }
 
+export interface EmailTemplate {
+  subject: string;
+  bodyHtml: string;
+}
+
+export interface EmailTemplates {
+  /** Email di conferma inviata a chi si iscrive */
+  confirmation?: EmailTemplate;
+  /** Avviso di nuova iscrizione inviato agli indirizzi di notifica */
+  notification?: EmailTemplate;
+}
+
 export interface SiteContent {
   name: string;
   heroTagline: string;
@@ -44,6 +56,10 @@ export interface SiteContent {
   footerText?: string;
   /** Indirizzi che ricevono le notifiche di nuove iscrizioni (default per tutti gli eventi) */
   notifyEmails: string[];
+  /** Indirizzi amministrativi in copia nascosta su ogni email di conferma inviata a chi si iscrive */
+  confirmationBccEmails?: string[];
+  /** Testi personalizzati delle email (se assenti si usano quelli predefiniti) */
+  emailTemplates?: EmailTemplates;
 }
 
 export interface NewsItem {

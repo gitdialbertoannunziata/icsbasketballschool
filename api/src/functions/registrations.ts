@@ -3,6 +3,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 import { requireAdmin } from '../lib/auth';
 import { container, readBlobJson, readContent, sasUrl, writeBlobJson } from '../lib/blob';
 import { escapeHtml, sendMail } from '../lib/email';
+import { DEFAULT_CONFIRMATION_MESSAGE, renderTemplate, resolveTemplate, type EmailVars } from '../shared/emailTemplates';
 import { isRegistrationOpen, validateRegistration, type FormValue } from '../lib/registrationValidation';
 import { safeFileName } from './upload';
 import {
@@ -11,6 +12,7 @@ import {
   type EventItem,
   type Registration,
   type RegistrationStatus,
+  type SiteContent,
 } from '../shared/types';
 
 const ID_RE = /^[a-zA-Z0-9-]{1,100}$/;
@@ -105,6 +107,29 @@ function summaryTable(ev: EventItem, reg: Registration): string {
   return `<table cellpadding="4" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">${rows.join('')}</table>`;
 }
 
+export function registrationEmailVars(ev: EventItem, reg: Registration, site: SiteContent): EmailVars {
+  const siteUrl = process.env.PUBLIC_SITE_URL ?? '';
+  const adminUrl = `${siteUrl}/admin/iscrizioni?evento=${encodeURIComponent(ev.id)}`;
+  const name = [reg.values.nome, reg.values.cognome].filter((v) => typeof v === 'string' && v).join(' ');
+  return {
+    text: {
+      evento: ev.title,
+      nome: name,
+      turno: ev.sessions.find((s) => s.id === reg.sessionId)?.label ?? '',
+      codice: reg.id,
+      messaggio: ev.registration.confirmationMessage || DEFAULT_CONFIRMATION_MESSAGE,
+      sito: site.name,
+      contatto: site.contacts.email,
+      email: reg.email ?? '',
+      allegati: String(reg.files.length),
+    },
+    html: {
+      riepilogo: summaryTable(ev, reg),
+      link: `<a href="${escapeHtml(adminUrl)}">Apri nel pannello</a>`,
+    },
+  };
+}
+
 async function submitRegistration(req: HttpRequest, ctx: InvocationContext): Promise<HttpResponseInit> {
   const eventId = req.params.eventId;
   if (!ID_RE.test(eventId)) return { status: 400, jsonBody: { error: 'Evento non valido' } };
@@ -160,35 +185,23 @@ async function submitRegistration(req: HttpRequest, ctx: InvocationContext): Pro
   ctx.log(`Nuova iscrizione ${id} per ${eventId}`);
 
   const { data: site } = await readContent('site');
-  const table = summaryTable(ev, reg);
-  const siteUrl = process.env.PUBLIC_SITE_URL ?? '';
+  const vars = registrationEmailVars(ev, reg, site);
   const notify = [...ev.registration.notifyEmails, ...site.notifyEmails];
+  const confirmation = renderTemplate(resolveTemplate('confirmation', site.emailTemplates), vars);
+  const notification = renderTemplate(resolveTemplate('notification', site.emailTemplates), vars);
   await Promise.all([
     reg.email
       ? sendMail(
           {
             to: [reg.email],
+            bcc: site.confirmationBccEmails,
             replyTo: site.contacts.email || undefined,
-            subject: `Richiesta di iscrizione ricevuta – ${ev.title}`,
-            html: `<p>Grazie! Abbiamo ricevuto la tua richiesta di iscrizione a <strong>${escapeHtml(ev.title)}</strong>.</p>
-<p>${escapeHtml(ev.registration.confirmationMessage ?? 'Ti contatteremo a breve per la conferma definitiva.')}</p>
-${table}
-<p>Codice pratica: <strong>${id}</strong></p>
-<p>${escapeHtml(site.name)}${site.contacts.email ? ` – ${escapeHtml(site.contacts.email)}` : ''}</p>`,
+            ...confirmation,
           },
           ctx,
         )
       : Promise.resolve(),
-    sendMail(
-      {
-        to: notify,
-        replyTo: reg.email,
-        subject: `Nuova iscrizione: ${ev.title} (${id})`,
-        html: `<p>Nuova iscrizione ricevuta per <strong>${escapeHtml(ev.title)}</strong>.</p>${table}
-<p>Allegati: ${files.length}. <a href="${escapeHtml(siteUrl)}/admin/iscrizioni?evento=${encodeURIComponent(eventId)}">Apri nel pannello</a></p>`,
-      },
-      ctx,
-    ),
+    sendMail({ to: notify, replyTo: reg.email, ...notification }, ctx),
   ]);
 
   return { status: 201, jsonBody: { ok: true, id } };

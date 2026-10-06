@@ -13,7 +13,7 @@ function parseName(req: HttpRequest): ContentName | undefined {
 export function toPublic(name: ContentName, data: unknown): unknown {
   switch (name) {
     case 'site': {
-      const { notifyEmails: _n, ...rest } = data as ContentMap['site'];
+      const { notifyEmails: _n, confirmationBccEmails: _b, emailTemplates: _t, ...rest } = data as ContentMap['site'];
       return { ...rest, notifyEmails: [] };
     }
     case 'news':

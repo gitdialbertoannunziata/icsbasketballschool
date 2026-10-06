@@ -21,6 +21,7 @@ const slug = z
   .max(120)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug non valido: usa lettere minuscole, numeri e trattini');
 const emails = z.array(z.string().email().max(200)).max(20);
+const emailTemplate = z.object({ subject: str(300), bodyHtml: z.string().max(50_000) }).optional();
 
 export const siteSchema: z.ZodType<SiteContent> = z.object({
   name: str(200),
@@ -54,6 +55,8 @@ export const siteSchema: z.ZodType<SiteContent> = z.object({
   cookieHtml: html,
   footerText: optStr(1000),
   notifyEmails: emails,
+  confirmationBccEmails: emails.optional(),
+  emailTemplates: z.object({ confirmation: emailTemplate, notification: emailTemplate }).optional(),
 });
 
 export const newsSchema: z.ZodType<NewsItem[]> = z.array(

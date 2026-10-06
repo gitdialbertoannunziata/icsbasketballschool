@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import type { SiteContent } from '@shared/types';
+import type { EmailTemplate, SiteContent } from '@shared/types';
+import { DEFAULT_EMAIL_TEMPLATES, EMAIL_PLACEHOLDERS, resolveTemplate, type EmailTemplateKind } from '@shared/emailTemplates';
 import { useAdminDoc, useDraft, useUnsavedWarning } from '../../lib/hooks';
 import {
   AdminError,
@@ -170,21 +171,88 @@ export default function SiteEditor() {
         )}
 
         {tab === 'notify' && (
-          <Card title="Email di notifica">
-            <p className="text-sm text-zinc-600">
-              Questi indirizzi ricevono un’email per ogni nuova iscrizione, per tutti gli eventi. Puoi aggiungere indirizzi specifici anche nelle impostazioni di ogni evento.
-            </p>
-            <StringListInput
-              label="Indirizzi"
-              values={draft.notifyEmails}
-              onChange={(v) => set('notifyEmails', v)}
-              placeholder="nome@esempio.it"
+          <>
+            <Card title="Email di notifica">
+              <p className="text-sm text-zinc-600">
+                Questi indirizzi ricevono un’email per ogni nuova iscrizione, per tutti gli eventi. Puoi aggiungere indirizzi specifici anche nelle impostazioni di ogni evento.
+              </p>
+              <StringListInput
+                label="Indirizzi"
+                values={draft.notifyEmails}
+                onChange={(v) => set('notifyEmails', v)}
+                placeholder="nome@esempio.it"
+              />
+            </Card>
+            <Card title="Copia delle conferme">
+              <p className="text-sm text-zinc-600">
+                Questi indirizzi ricevono in copia nascosta (CCN) ogni email di conferma inviata a chi si iscrive, esattamente come la riceve la famiglia.
+              </p>
+              <StringListInput
+                label="Indirizzi amministrativi"
+                values={draft.confirmationBccEmails ?? []}
+                onChange={(v) => set('confirmationBccEmails', v.length ? v : undefined)}
+                placeholder="segreteria@esempio.it"
+              />
+            </Card>
+            <EmailTemplateCard
+              kind="confirmation"
+              title="Testo email di conferma (a chi si iscrive)"
+              value={draft.emailTemplates?.confirmation}
+              onChange={(v) => set('emailTemplates', { ...draft.emailTemplates, confirmation: v })}
             />
-          </Card>
+            <EmailTemplateCard
+              kind="notification"
+              title="Testo email di nuova iscrizione (agli indirizzi di notifica)"
+              value={draft.emailTemplates?.notification}
+              onChange={(v) => set('emailTemplates', { ...draft.emailTemplates, notification: v })}
+            />
+          </>
         )}
       </div>
 
       <SaveBar dirty={dirty} saving={doc.saving} onReset={reset} onSave={() => run(() => doc.save(draft))} />
     </>
+  );
+}
+
+function EmailTemplateCard({
+  kind,
+  title,
+  value,
+  onChange,
+}: {
+  kind: EmailTemplateKind;
+  title: string;
+  value: EmailTemplate | undefined;
+  onChange: (v: EmailTemplate | undefined) => void;
+}) {
+  const tpl = resolveTemplate(kind, value && { [kind]: value });
+  const isDefault = !value;
+  const setField = (k: keyof EmailTemplate, v: string) => onChange({ ...tpl, [k]: v });
+  return (
+    <Card
+      title={title}
+      actions={
+        !isDefault && (
+          <Button size="sm" variant="secondary" onClick={() => onChange(undefined)}>
+            Ripristina testo predefinito
+          </Button>
+        )
+      }
+    >
+      <TextInput label="Oggetto" value={tpl.subject} placeholder={DEFAULT_EMAIL_TEMPLATES[kind].subject} onChange={(v) => setField('subject', v)} />
+      <RichEditor label="Testo" value={tpl.bodyHtml} onChange={(v) => setField('bodyHtml', v)} />
+      <div className="rounded-md bg-zinc-50 p-3 text-xs text-zinc-600 ring-1 ring-zinc-200">
+        <p className="mb-1 font-medium text-zinc-700">Segnaposto disponibili (vengono sostituiti con i dati dell’iscrizione):</p>
+        <ul className="grid gap-x-4 gap-y-0.5 sm:grid-cols-2">
+          {EMAIL_PLACEHOLDERS.filter((p) => !p.only || p.only === kind).map((p) => (
+            <li key={p.key}>
+              <code className="font-mono text-zinc-900">{`{{${p.key}}}`}</code> – {p.label}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2">Metti <code className="font-mono text-zinc-900">{'{{riepilogo}}'}</code> da solo su una riga per inserire la tabella con i dati del modulo.</p>
+      </div>
+    </Card>
   );
 }
