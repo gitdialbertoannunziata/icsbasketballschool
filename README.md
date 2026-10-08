@@ -2,7 +2,7 @@
 
 Nuovo sito di [icsbasketballschool.it](https://icsbasketballschool.it) su **Azure Static Web Apps**, con pannello di gestione in `/admin` e tutti i dati su **Azure Blob Storage**.
 
-📘 **[Guida al pannello di amministrazione](docs/admin/README.md)** (con screenshot): come gestire testi, news, eventi, iscrizioni, staff, documenti e galleria.
+📘 **[Guida al pannello di amministrazione (PDF)](docs/admin/Guida-pannello-admin.pdf)** (con screenshot; sorgente in [`docs/admin/README.md`](docs/admin/README.md)): come gestire testi, news, eventi, iscrizioni, staff, documenti e galleria.
 
 ## Architettura
 
