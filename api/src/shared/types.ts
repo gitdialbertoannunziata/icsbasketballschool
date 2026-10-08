@@ -137,6 +137,10 @@ export interface EventItem {
   title: string;
   subtitle?: string;
   status: EventStatus;
+  /** Mostra un link all'evento nel menu principale del sito (solo se pubblicato) */
+  showInMenu?: boolean;
+  /** Testo del link nel menu; se vuoto si usa il titolo */
+  menuLabel?: string;
   startDate?: string;
   endDate?: string;
   ageGroups?: string;

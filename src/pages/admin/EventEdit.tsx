@@ -140,6 +140,28 @@ export default function EventEdit() {
               </div>
               <TextInput label="Indirizzo pagina" help={`/eventi/${draft.slug || '…'}`} value={draft.slug} onChange={(v) => set('slug', slugify(v))} />
             </Card>
+            <Card title="Menu del sito">
+              <Toggle
+                label="Mostra nel menu principale"
+                help="Aggiunge un pulsante in evidenza nel menu in alto, che porta alla pagina dell’evento. Compare solo quando l’evento è pubblicato: consigliati al massimo 1–2 eventi."
+                checked={!!draft.showInMenu}
+                onChange={(v) => set('showInMenu', v || undefined)}
+              />
+              {draft.showInMenu && (
+                <TextInput
+                  label="Testo nel menu (facoltativo)"
+                  placeholder={draft.title || 'es. Summer Camp'}
+                  help="Una versione breve del titolo, es. «Summer Camp 2026». Se vuoto si usa il titolo."
+                  value={draft.menuLabel}
+                  onChange={(v) => set('menuLabel', v || undefined)}
+                />
+              )}
+              {draft.showInMenu && draft.status !== 'published' && (
+                <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 ring-1 ring-amber-200">
+                  L’evento non è pubblicato: il link comparirà nel menu solo quando lo stato sarà «Pubblicato».
+                </p>
+              )}
+            </Card>
             <Card title="Luogo">
               <div className="grid gap-4 sm:grid-cols-2">
                 <TextInput label="Nome" value={draft.location?.name} onChange={(v) => set('location', { ...draft.location, name: v })} />

@@ -62,6 +62,7 @@ export default function EventsAdmin() {
                   <p className="text-xs text-zinc-500">
                     {formatDateRange(ev.startDate, ev.endDate) || 'Date da definire'}
                     {ev.registration.enabled && ' · iscrizioni attive'}
+                    {ev.showInMenu && ' · nel menu'}
                   </p>
                 </Link>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS[ev.status].cls}`}>{STATUS[ev.status].label}</span>

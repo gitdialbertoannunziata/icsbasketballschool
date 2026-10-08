@@ -146,6 +146,11 @@ describe('schemas & csv', () => {
     expect(eventsSchema.safeParse([makeEvent({ slug: 'Non Valido' })]).success).toBe(false);
   });
 
+  it('lo schema eventi accetta le opzioni del menu e limita la lunghezza del testo', () => {
+    expect(eventsSchema.safeParse([makeEvent({ showInMenu: true, menuLabel: 'Summer Camp 2026' })]).success).toBe(true);
+    expect(eventsSchema.safeParse([makeEvent({ showInMenu: true, menuLabel: 'x'.repeat(61) })]).success).toBe(false);
+  });
+
   it('esporta CSV con separatore ; ed escape', () => {
     const ev = makeEvent();
     const csv = toCsv(ev, [
