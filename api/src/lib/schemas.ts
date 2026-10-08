@@ -102,6 +102,8 @@ export const eventsSchema: z.ZodType<EventItem[]> = z.array(
     title: str(300),
     subtitle: optStr(500),
     status: z.enum(['draft', 'published', 'archived']),
+    showInMenu: z.boolean().optional(),
+    menuLabel: optStr(60),
     startDate: optStr(30),
     endDate: optStr(30),
     ageGroups: optStr(200),

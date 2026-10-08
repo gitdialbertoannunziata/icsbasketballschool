@@ -38,7 +38,10 @@ export default function PublicLayout() {
   useHashScroll();
   useEffect(() => setOpen(false), [location.pathname, location.hash]);
 
-  const featured = (events ?? []).filter((e) => e.status === 'published').slice(0, 2);
+  // Eventi scelti dall'admin con «Mostra nel menu principale», in ordine di data.
+  const menuEvents = (events ?? [])
+    .filter((e) => e.status === 'published' && e.showInMenu)
+    .sort((a, b) => (a.startDate ?? '').localeCompare(b.startDate ?? ''));
   const logo = site?.logo || '/logo.png';
 
   return (
@@ -67,13 +70,14 @@ export default function PublicLayout() {
                 </NavLink>
               ),
             )}
-            {featured.map((e) => (
+            {menuEvents.map((e) => (
               <Link
                 key={e.id}
                 to={`/eventi/${e.slug}`}
-                className="hidden rounded-md bg-brand px-3 py-2 text-white transition hover:bg-brand-light 2xl:inline-block"
+                title={e.title}
+                className="hidden max-w-56 truncate rounded-md bg-brand px-3 py-2 text-white transition hover:bg-brand-light xl:inline-block"
               >
-                {e.title}
+                {e.menuLabel || e.title}
               </Link>
             ))}
           </nav>
@@ -96,9 +100,9 @@ export default function PublicLayout() {
                   {n.label}
                 </Link>
               ))}
-              {featured.map((e) => (
+              {menuEvents.map((e) => (
                 <Link key={e.id} to={`/eventi/${e.slug}`} className="py-3 text-brand-light">
-                  {e.title}
+                  {e.menuLabel || e.title}
                 </Link>
               ))}
             </Container>
